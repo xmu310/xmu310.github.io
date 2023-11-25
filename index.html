@@ -21,8 +21,8 @@
       <h2>下載遊戲</h2>
       <br>
       <p>請掃描以下 QR Code 或點擊連結下載遊戲 APK 檔案。</p>
-      <img src="http://s05.calm9.com/qrcode/2023-11/R5LH368ZE8.png" alt="APK 下載 QR Code">
-      <a href="https://drive.google.com/uc?export=download&id=18a9q6lvwypnUTr9cnLL3oCrCjs9p1h5H" download>下載 APK</a>
+      <img id="qrCode" src="" alt="APK 下載 QR Code">
+      <a id="downloadLink" href="" download>下載 APK</a>
     </section>
     
     <section class="dev-team">
@@ -35,5 +35,21 @@
   <footer>
     <p>&copy; 2023 NTNU CSIE SE Group 1</p>
   </footer>
+
+  <script>
+    fetch('https://api.github.com/repos/Raylin0722/SE-project/releases/latest')
+      .then(response => response.json())
+      .then(data => {
+        const latestRelease = data.tag_name;
+        const apkDownloadLink = `https://github.com/Raylin0722/SE-project/releases/download/${latestRelease}/CatchTomato_${latestRelease}.apk`;
+        const qrCodeURL = `https://chart.googleapis.com/chart?cht=qr&chl=${apkDownloadLink}&chs=150x150`;
+
+        document.getElementById('qrCode').src = qrCodeURL;
+        document.getElementById('downloadLink').href = apkDownloadLink;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  </script>
 </body>
 </html>
