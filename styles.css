@@ -15,6 +15,22 @@ header {
   padding: 20px 0;
   background-color: #4CAF50;
   color: white;
+  display: flex;
+  align-items: center; /* 垂直居中 */
+}
+
+header h1{
+    margin-left:10px;
+}
+
+.logo-container {
+  display: flex;
+  margin-left: 0px; /* 右对齐 */
+}
+.logo-container img {
+  width: 50px; /* 图片宽度，根据需要调整 */
+  height: 50px; /* 图片高度，根据需要调整 */
+  margin-left: 10px; /* 图片间距，根据需要调整 */
 }
 
 main {
