@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>提示頁面</title>
+  <link rel="icon" href="icon.png" type="image/png">
+  <link rel="shortcut icon" href="icon.png" type="image/png">
+</head>
+<body>
+  <div id="message"></div>
+  <div id="countdown"></div>
+  <script>
+    const currentVersion = getParameterByName('currentVersion');
+    const latestVersion = getParameterByName('latestVersion');
+    const messageElement = document.getElementById('message');
+    const countdownElement = document.getElementById('countdown');
+    let countdown = 5;
+    if (currentVersion && latestVersion) {
+      messageElement.innerHTML=`您目前的遊戲版本為 ${currentVersion}，請至<a href="index.html">官網</a>下載最新版 ${latestVersion}`;
+    } else {
+      messageElement.innerHTML='無法獲取版本信息。';
+    }
+    function getParameterByName(name) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(name);
+    }
+    countdownElement.textContent = `${countdown}秒後跳轉至官網`;
+    countdown--;
+    const countdownInterval = setInterval(function() {
+        countdownElement.textContent = `${countdown}秒後跳轉至官網`;
+        countdown--;
+        if (countdown < 0) {
+          clearInterval(countdownInterval);
+          window.location.href = "index.html";
+        }
+    }, 1000);
+  </script>
+</body>
+</html>
