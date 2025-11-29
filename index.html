@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Polyglot Pulse - The Daily Multilingual</title>
+    
+    <!-- 1. Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. Google Fonts: Serif fonts for that high-density newspaper look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Noto+Serif+JP:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Serif+Hebrew:wght@400;700&family=Noto+Serif+Tibetan:wght@400;700&family=Noto+Serif+Thai:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- 3. React & ReactDOM (UMD for standalone usage) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- 4. Babel (To compile JSX in the browser) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f0ebe4; /* Slightly darker, aged paper look */
+            color: #1a1a1a;
+            font-family: 'Noto Serif', serif;
+        }
+        
+        /* Font classes mapping */
+        .font-serif-base { font-family: 'Noto Serif', serif; }
+        .font-serif-jp { font-family: 'Noto Serif JP', serif; }
+        .font-serif-kr { font-family: 'Noto Serif KR', serif; }
+        .font-serif-cn { font-family: 'Noto Serif SC', serif; }
+        .font-serif-in { font-family: 'Noto Serif Devanagari', serif; }
+        .font-serif-he { font-family: 'Noto Serif Hebrew', serif; }
+        .font-serif-bo { font-family: 'Noto Serif Tibetan', serif; }
+        .font-serif-th { font-family: 'Noto Serif Thai', serif; }
+
+        /* Newspaper Text Justification */
+        .text-justify-all { 
+            text-align: justify; 
+            text-justify: inter-character; 
+        }
+
+        /* Custom Scrollbar for Settings */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- MAIN APPLICATION SCRIPT -->
+    <script type="text/babel">
+        /*******************************************************
+         * 1. CONSTANTS & CONFIGURATION
+         *******************************************************/
+        const AVAILABLE_LANGUAGES = [
+            { id: 'jp', name: 'Japanese', nativeName: '日本語', wikiCode: 'ja', locale: 'ja-JP', flag: 'JP', fontClass: 'font-serif-jp' },
+            { id: 'kr', name: 'Korean', nativeName: '한국어', wikiCode: 'ko', locale: 'ko-KR', flag: 'KR', fontClass: 'font-serif-kr' },
+            { id: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', wikiCode: 'vi', locale: 'vi-VN', flag: 'VI', fontClass: 'font-serif-base' },
+            { id: 'es', name: 'Spanish', nativeName: 'Español', wikiCode: 'es', locale: 'es-ES', flag: 'ES', fontClass: 'font-serif-base' },
+            { id: 'fr', name: 'French', nativeName: 'Français', wikiCode: 'fr', locale: 'fr-FR', flag: 'FR', fontClass: 'font-serif-base' },
+            { id: 'de', name: 'German', nativeName: 'Deutsch', wikiCode: 'de', locale: 'de-DE', flag: 'DE', fontClass: 'font-serif-base' },
+            { id: 'el', name: 'Greek', nativeName: 'Ελληνικά', wikiCode: 'el', locale: 'el-GR', flag: 'GR', fontClass: 'font-serif-base' },
+            { id: 'it', name: 'Italian', nativeName: 'Italiano', wikiCode: 'it', locale: 'it-IT', flag: 'IT', fontClass: 'font-serif-base' },
+            { id: 'ru', name: 'Russian', nativeName: 'Русский', wikiCode: 'ru', locale: 'ru-RU', flag: 'RU', fontClass: 'font-serif-base' },
+            { id: 'he', name: 'Hebrew', nativeName: 'עברית', wikiCode: 'he', locale: 'he-IL', flag: 'IL', fontClass: 'font-serif-he', dir: 'rtl' },
+            { id: 'ar', name: 'Arabic', nativeName: 'العربية', wikiCode: 'ar', locale: 'ar-SA', flag: 'AR', fontClass: 'font-serif-base', dir: 'rtl' },
+            { id: 'hi', name: 'Hindi', nativeName: 'हिन्दी', wikiCode: 'hi', locale: 'hi-IN', flag: 'IN', fontClass: 'font-serif-in' },
+            { id: 'bo', name: 'Tibetan', nativeName: 'བོད་ཡིག', wikiCode: 'bo', locale: 'bo-CN', flag: 'TB', fontClass: 'font-serif-bo' },
+            { id: 'en', name: 'English', nativeName: 'English', wikiCode: 'en', locale: 'en-US', flag: 'EN', fontClass: 'font-serif-base' },
+            { id: 'cn', name: 'Chinese', nativeName: '中文', wikiCode: 'zh', locale: 'zh-CN', flag: 'CN', fontClass: 'font-serif-cn' },
+        ];
+
+        const DEFAULT_LANGUAGES = ['jp', 'kr', 'vi', 'es', 'fr', 'de', 'el', 'it', 'ru', 'he', 'ar', 'hi', 'bo'];
+
+        /*******************************************************
+         * 2. SERVICES (API & AUDIO)
+         *******************************************************/
+        
+        // --- Wikipedia API Service ---
+        const fetchRandomWikiArticle = async (wikiCode, retries = 2) => {
+            try {
+                // To fetch random articles with HIGH text density
+                const params = new URLSearchParams({
+                    action: 'query',
+                    format: 'json',
+                    generator: 'random',
+                    grnnamespace: '0', 
+                    prop: 'extracts|pageimages|info',
+                    inprop: 'url',
+                    // High character count for that "dense text" feel
+                    exchars: '3500', 
+                    exlimit: '1',
+                    explaintext: '1', 
+                    pithumbsize: '400',
+                    // CRITICAL for local file:// execution:
+                    origin: '*' 
+                });
+
+                const url = `https://${wikiCode}.wikipedia.org/w/api.php?${params.toString()}`;
+                
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`Wiki Network Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const pages = data.query?.pages;
+                
+                if (!pages) throw new Error("No pages found");
+
+                const pageId = Object.keys(pages)[0];
+                const page = pages[pageId];
+
+                // Ensure we actually have text
+                if (!page.extract || page.extract.length < 100) {
+                    throw new Error("Article too short, retrying...");
+                }
+
+                return {
+                    title: page.title,
+                    extract: page.extract,
+                    thumbnailUrl: page.thumbnail?.source,
+                    pageUrl: page.fullurl,
+                    lang: wikiCode
+                };
+
+            } catch (error) {
+                if (retries > 0) {
+                    console.warn(`Retrying ${wikiCode}...`);
+                    await new Promise(r => setTimeout(r, 1000));
+                    return fetchRandomWikiArticle(wikiCode, retries - 1);
+                }
+                throw error;
+            }
+        };
+
+        // --- Audio Service (Browser Native) ---
+        const speakText = (text, locale) => {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = locale;
+            utterance.rate = 0.9;
+            utterance.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            // Try to match the exact locale first, then the language code
+            const voice = voices.find(v => v.lang === locale) || 
+                          voices.find(v => v.lang.startsWith(locale.split('-')[0]));
+            if (voice) utterance.voice = voice;
+
+            window.speechSynthesis.speak(utterance);
+        };
+
+        const stopSpeech = () => {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+        };
+
+        /*******************************************************
+         * 3. COMPONENTS
+         *******************************************************/
+
+        // --- Icons (Inline SVGs) ---
+        const Icons = {
+            Volume: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>,
+            Translate: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 8 5 5 5-5"></path><path d="M12 2v20"></path><path d="M2 12h20"></path><path d="m19 16-5 5-5-5"></path></svg>,
+            Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>,
+            RefreshBig: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>,
+            Settings: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
+            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>,
+            Close: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 18 18"></path></svg>
+        };
+
+        // --- Settings Modal ---
+        const SettingsModal = ({ isOpen, onClose, selectedIds, onToggleId }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-none shadow-2xl w-full max-w-md overflow-hidden border-2 border-slate-900">
+                        <div className="flex items-center justify-between p-5 border-b-2 border-slate-900 bg-slate-50">
+                            <h2 className="text-xl font-black uppercase tracking-wider font-serif-base text-slate-900">Select Editions</h2>
+                            <button onClick={onClose} className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors">
+                                <Icons.Close />
+                            </button>
+                        </div>
+                        <div className="p-5 max-h-[60vh] overflow-y-auto custom-scroll bg-white">
+                            <div className="space-y-3">
+                                {AVAILABLE_LANGUAGES.map((lang) => {
+                                    const isSelected = selectedIds.includes(lang.id);
+                                    return (
+                                        <button
+                                            key={lang.id}
+                                            onClick={() => onToggleId(lang.id)}
+                                            className={`w-full flex items-center justify-between p-4 border transition-all duration-200 group ${
+                                                isSelected 
+                                                    ? 'border-slate-900 bg-slate-100' 
+                                                    : 'border-slate-300 hover:border-slate-500 hover:bg-slate-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-2xl font-serif-base font-bold text-slate-300 group-hover:text-slate-500 w-8">{lang.flag}</span>
+                                                <div className="text-left">
+                                                    <div className={`font-bold uppercase tracking-wide text-sm ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>
+                                                        {lang.name}
+                                                    </div>
+                                                    <div className={`text-sm ${lang.fontClass} text-slate-500`}>{lang.nativeName}</div>
+                                                </div>
+                                            </div>
+                                            <div className={`w-6 h-6 border-2 flex items-center justify-center transition-colors ${
+                                                isSelected ? 'bg-slate-900 border-slate-900 text-white' : 'border-slate-300'
+                                            }`}>
+                                                {isSelected && <Icons.Check />}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        <div className="p-5 bg-slate-50 border-t-2 border-slate-900">
+                           <button onClick={onClose} className="w-full py-3 bg-slate-900 text-white font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-lg">
+                             Confirm Selection
+                           </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- Language Card ---
+        const LanguageCard = ({ lang, content, loading, onRefresh }) => {
+            const isRtl = lang.dir === 'rtl';
+            const fontClass = lang.fontClass || 'font-serif-base';
+
+            const handlePlayAudio = (e) => {
+                e.stopPropagation();
+                if (content?.extract) {
+                    const cleanText = content.extract.replace(/\[.*?\]/g, '').substring(0, 500); // Read first 500 chars
+                    speakText(cleanText, lang.locale);
+                }
+            };
+
+            const getTranslateUrl = () => {
+                if (!content) return '#';
+                const text = content.extract.substring(0, 1500);
+                return `https://translate.google.com/?sl=${lang.wikiCode}&tl=en&text=${encodeURIComponent(text)}&op=translate`;
+            };
+
+            return (
+                <div className="break-inside-avoid mb-8 bg-white border border-slate-300 shadow-sm relative group p-5 h-fit hover:shadow-md transition-shadow">
+                    {/* Header */}
+                    <div className={`flex items-center justify-between border-b-4 border-slate-900 mb-4 pb-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-baseline gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <span className="font-black text-lg uppercase tracking-widest text-slate-900">{lang.name}</span>
+                            <span className={`text-sm text-slate-500 ${fontClass}`}>{lang.nativeName}</span>
+                        </div>
+                        
+                        {/* Tools */}
+                        <div className={`flex gap-4 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <button onClick={handlePlayAudio} disabled={!content} className="text-slate-400 hover:text-slate-900 transition-colors" title="Read Aloud">
+                                <Icons.Volume />
+                            </button>
+                            <a href={getTranslateUrl()} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors" title="Translate">
+                                <Icons.Translate />
+                            </a>
+                            <button onClick={onRefresh} className={`text-slate-400 hover:text-slate-900 transition-colors ${loading ? 'animate-spin' : ''}`} title="Next Article">
+                                <Icons.Refresh />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    {loading ? (
+                        <div className="animate-pulse space-y-3 py-2">
+                            <div className="h-6 bg-slate-200 w-3/4 mb-4"></div>
+                            <div className="h-2 bg-slate-100 w-full"></div>
+                            <div className="h-2 bg-slate-100 w-full"></div>
+                            <div className="h-2 bg-slate-100 w-full"></div>
+                            <div className="h-2 bg-slate-100 w-full"></div>
+                            <div className="h-2 bg-slate-100 w-full"></div>
+                            <div className="h-2 bg-slate-100 w-full"></div>
+                            <div className="h-2 bg-slate-100 w-5/6"></div>
+                        </div>
+                    ) : content ? (
+                        <article className={isRtl ? 'rtl' : 'ltr'} dir={isRtl ? 'rtl' : 'ltr'}>
+                            <h3 className={`text-2xl font-bold text-slate-900 mb-4 leading-tight ${fontClass} ${isRtl ? 'text-right' : 'text-left'}`}>
+                                <a href={content.pageUrl} target="_blank" rel="noopener noreferrer" className="hover:underline decoration-2 underline-offset-4">
+                                    {content.title}
+                                </a>
+                            </h3>
+                            
+                            <div className="relative">
+                                {content.thumbnailUrl && (
+                                    <img 
+                                        src={content.thumbnailUrl} 
+                                        alt=""
+                                        className={`${isRtl ? 'float-left mr-5' : 'float-right ml-5'} mb-3 w-32 h-auto grayscale hover:grayscale-0 transition-all border border-slate-200 p-1 bg-white`}
+                                    />
+                                )}
+                                <p className={`text-[0.95rem] leading-[1.7] text-slate-800 text-justify text-justify-all ${fontClass}`}>
+                                    {content.extract}
+                                </p>
+                            </div>
+                        </article>
+                    ) : (
+                        <div className="text-sm text-red-500 italic py-4 border-t border-red-100">
+                           Connection interrupted. <button onClick={onRefresh} className="underline font-bold">Try again</button>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        /*******************************************************
+         * 4. MAIN APPLICATION
+         *******************************************************/
+        const App = () => {
+            const [selectedLangIds, setSelectedLangIds] = React.useState(() => {
+                const saved = localStorage.getItem('polyglot_langs_v2');
+                return saved ? JSON.parse(saved) : DEFAULT_LANGUAGES;
+            });
+            const [contentState, setContentState] = React.useState({});
+            const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+
+            React.useEffect(() => {
+                localStorage.setItem('polyglot_langs_v2', JSON.stringify(selectedLangIds));
+            }, [selectedLangIds]);
+
+            // Staggered Fetching
+            const fetchContent = React.useCallback(async (langId) => {
+                const langConfig = AVAILABLE_LANGUAGES.find(l => l.id === langId);
+                if (!langConfig) return;
+
+                setContentState(prev => ({ ...prev, [langId]: { ...prev[langId], loading: true, error: null } }));
+
+                try {
+                    const data = await fetchRandomWikiArticle(langConfig.wikiCode);
+                    setContentState(prev => ({ ...prev, [langId]: { data, loading: false, error: null } }));
+                } catch (error) {
+                    console.error(`Error ${langId}:`, error);
+                    setContentState(prev => ({ ...prev, [langId]: { ...prev[langId], loading: false, error: "Error" } }));
+                }
+            }, []);
+
+            React.useEffect(() => {
+                const langsToFetch = selectedLangIds.filter(id => !contentState[id]?.data && !contentState[id]?.loading);
+                if (langsToFetch.length === 0) return;
+
+                const fetchSequentially = async () => {
+                    for (const id of langsToFetch) {
+                        await fetchContent(id);
+                        await new Promise(r => setTimeout(r, 200)); 
+                    }
+                };
+                fetchSequentially();
+            }, [selectedLangIds, fetchContent]);
+
+            const handleRefreshAll = () => {
+                stopSpeech();
+                const refresh = async () => {
+                    for (const id of selectedLangIds) {
+                        fetchContent(id);
+                        await new Promise(r => setTimeout(r, 100));
+                    }
+                };
+                refresh();
+            };
+
+            const toggleLanguage = (id) => {
+                setSelectedLangIds(prev => prev.includes(id) ? prev.filter(l => l !== id) : [...prev, id]);
+            };
+
+            const activeLanguages = AVAILABLE_LANGUAGES.filter(l => selectedLangIds.includes(l.id));
+
+            return (
+                <div className="min-h-screen p-4 sm:p-8 lg:p-12 max-w-[1920px] mx-auto">
+                    <header className="border-b-[6px] border-slate-900 mb-10 pb-6 flex flex-col md:flex-row justify-between items-end gap-6">
+                        <div className="w-full md:w-auto">
+                            <div className="text-xs font-bold tracking-[0.4em] text-slate-500 uppercase mb-2 border-b border-slate-300 pb-1 inline-block">
+                                The Daily Multilingual
+                            </div>
+                            <h1 className="text-5xl sm:text-7xl font-black font-serif-base tracking-tighter text-slate-900 uppercase leading-[0.85]">
+                                Polyglot Pulse
+                            </h1>
+                        </div>
+                        
+                        <div className="flex gap-4 w-full md:w-auto justify-end">
+                            <button onClick={handleRefreshAll} className="px-6 py-3 border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-colors uppercase text-sm tracking-widest flex items-center gap-2">
+                                <Icons.RefreshBig /> Update Issue
+                            </button>
+                            <button onClick={() => setIsSettingsOpen(true)} className="px-6 py-3 bg-slate-200 text-slate-900 font-bold hover:bg-slate-300 transition-colors uppercase text-sm tracking-widest flex items-center gap-2">
+                                <Icons.Settings /> Editions
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4 gap-8 space-y-8">
+                        {activeLanguages.map(lang => (
+                            <LanguageCard 
+                                key={lang.id}
+                                lang={lang}
+                                content={contentState[lang.id]?.data || null}
+                                loading={contentState[lang.id]?.loading || false}
+                                onRefresh={() => fetchContent(lang.id)}
+                            />
+                        ))}
+                        
+                        <div onClick={() => setIsSettingsOpen(true)} className="break-inside-avoid mb-6 border-4 border-double border-slate-300 min-h-[300px] flex flex-col items-center justify-center cursor-pointer hover:border-slate-900 hover:bg-white transition-colors text-slate-400 hover:text-slate-900 group">
+                            <div className="transform group-hover:scale-110 transition-transform"><Icons.Plus /></div>
+                            <span className="mt-4 text-sm font-bold uppercase tracking-widest">Subscribe to more regions</span>
+                        </div>
+                    </main>
+
+                    <SettingsModal 
+                        isOpen={isSettingsOpen}
+                        onClose={() => setIsSettingsOpen(false)}
+                        selectedIds={selectedLangIds}
+                        onToggleId={toggleLanguage}
+                    />
+                </div>
+            );
+        };
+
+        // --- Mount ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
