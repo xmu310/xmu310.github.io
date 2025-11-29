@@ -1,58 +1,95 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Polyglot Pulse - The Daily Multilingual</title>
+    <title>EPHEMERA</title>
     
     <!-- 1. Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#000000', // Pure Black
+                        mist: '#FFFFFF', // Pure White
+                        bone: '#FFFFFF', // Pure White
+                        dust: '#FFFFFF', // Pure White (used with opacity)
+                    },
+                    fontFamily: {
+                        // EB Garamond is excellent for that "LaTeX" / Old Academic Print look
+                        latex: ['"EB Garamond"', 'serif'],
+                        serif: ['"EB Garamond"', 'serif'],
+                    },
+                }
+            }
+        }
+    </script>
     
-    <!-- 2. Google Fonts: Serif fonts for that high-density newspaper look -->
+    <!-- 2. Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Noto+Serif+JP:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Noto+Serif+SC:wght@400;700&family=Noto+Serif+Devanagari:wght@400;700&family=Noto+Serif+Hebrew:wght@400;700&family=Noto+Serif+Tibetan:wght@400;700&family=Noto+Serif+Thai:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Importing EB Garamond with Italic weights for that manuscript feel -->
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Noto+Serif+JP:wght@300;500&family=Noto+Serif+KR:wght@300;500&family=Noto+Serif+SC:wght@300;500&family=Noto+Serif+Devanagari:wght@300;500&family=Noto+Serif+Hebrew:wght@300;500&family=Noto+Serif+Tibetan:wght@300;500&display=swap" rel="stylesheet">
 
-    <!-- 3. React & ReactDOM (UMD for standalone usage) -->
+    <!-- 3. React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     
-    <!-- 4. Babel (To compile JSX in the browser) -->
+    <!-- 4. Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
         body {
-            background-color: #f0ebe4; /* Slightly darker, aged paper look */
-            color: #1a1a1a;
-            font-family: 'Noto Serif', serif;
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: 'EB Garamond', serif;
+            overflow-x: hidden;
+        }
+
+        /* High Contrast Selection */
+        ::selection {
+            background: #FFFFFF;
+            color: #000000;
         }
         
         /* Font classes mapping */
-        .font-serif-base { font-family: 'Noto Serif', serif; }
+        .font-serif-base { font-family: 'EB Garamond', serif; }
         .font-serif-jp { font-family: 'Noto Serif JP', serif; }
         .font-serif-kr { font-family: 'Noto Serif KR', serif; }
         .font-serif-cn { font-family: 'Noto Serif SC', serif; }
         .font-serif-in { font-family: 'Noto Serif Devanagari', serif; }
         .font-serif-he { font-family: 'Noto Serif Hebrew', serif; }
         .font-serif-bo { font-family: 'Noto Serif Tibetan', serif; }
-        .font-serif-th { font-family: 'Noto Serif Thai', serif; }
 
-        /* Newspaper Text Justification */
+        /* Text Justification */
         .text-justify-all { 
             text-align: justify; 
             text-justify: inter-character; 
         }
 
-        /* Custom Scrollbar for Settings */
-        .custom-scroll::-webkit-scrollbar {
+        /* Fade In Animation */
+        @keyframes driftIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-drift {
+            animation: driftIn 1.8s ease-out forwards;
+        }
+
+        /* Custom Scrollbar - Pure Black/White */
+        ::-webkit-scrollbar {
             width: 6px;
         }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        ::-webkit-scrollbar-track {
+            background: #000000;
+            border-left: 1px solid #333;
         }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
+        ::-webkit-scrollbar-thumb {
+            background: #FFFFFF;
+            border: 2px solid #000000;
         }
     </style>
 <script type="importmap">
@@ -72,36 +109,34 @@
     <!-- MAIN APPLICATION SCRIPT -->
     <script type="text/babel">
         /*******************************************************
-         * 1. CONSTANTS & CONFIGURATION
+         * 1. CONFIGURATION
          *******************************************************/
         const AVAILABLE_LANGUAGES = [
-            { id: 'jp', name: 'Japanese', nativeName: '日本語', wikiCode: 'ja', locale: 'ja-JP', flag: 'JP', fontClass: 'font-serif-jp' },
-            { id: 'kr', name: 'Korean', nativeName: '한국어', wikiCode: 'ko', locale: 'ko-KR', flag: 'KR', fontClass: 'font-serif-kr' },
-            { id: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', wikiCode: 'vi', locale: 'vi-VN', flag: 'VI', fontClass: 'font-serif-base' },
-            { id: 'es', name: 'Spanish', nativeName: 'Español', wikiCode: 'es', locale: 'es-ES', flag: 'ES', fontClass: 'font-serif-base' },
-            { id: 'fr', name: 'French', nativeName: 'Français', wikiCode: 'fr', locale: 'fr-FR', flag: 'FR', fontClass: 'font-serif-base' },
-            { id: 'de', name: 'German', nativeName: 'Deutsch', wikiCode: 'de', locale: 'de-DE', flag: 'DE', fontClass: 'font-serif-base' },
-            { id: 'el', name: 'Greek', nativeName: 'Ελληνικά', wikiCode: 'el', locale: 'el-GR', flag: 'GR', fontClass: 'font-serif-base' },
-            { id: 'it', name: 'Italian', nativeName: 'Italiano', wikiCode: 'it', locale: 'it-IT', flag: 'IT', fontClass: 'font-serif-base' },
-            { id: 'ru', name: 'Russian', nativeName: 'Русский', wikiCode: 'ru', locale: 'ru-RU', flag: 'RU', fontClass: 'font-serif-base' },
-            { id: 'he', name: 'Hebrew', nativeName: 'עברית', wikiCode: 'he', locale: 'he-IL', flag: 'IL', fontClass: 'font-serif-he', dir: 'rtl' },
-            { id: 'ar', name: 'Arabic', nativeName: 'العربية', wikiCode: 'ar', locale: 'ar-SA', flag: 'AR', fontClass: 'font-serif-base', dir: 'rtl' },
-            { id: 'hi', name: 'Hindi', nativeName: 'हिन्दी', wikiCode: 'hi', locale: 'hi-IN', flag: 'IN', fontClass: 'font-serif-in' },
-            { id: 'bo', name: 'Tibetan', nativeName: 'བོད་ཡིག', wikiCode: 'bo', locale: 'bo-CN', flag: 'TB', fontClass: 'font-serif-bo' },
-            { id: 'en', name: 'English', nativeName: 'English', wikiCode: 'en', locale: 'en-US', flag: 'EN', fontClass: 'font-serif-base' },
-            { id: 'cn', name: 'Chinese', nativeName: '中文', wikiCode: 'zh', locale: 'zh-CN', flag: 'CN', fontClass: 'font-serif-cn' },
+            { id: 'jp', name: 'Japanese', nativeName: '日本語', wikiCode: 'ja', flag: 'JP', fontClass: 'font-serif-jp' },
+            { id: 'kr', name: 'Korean', nativeName: '한국어', wikiCode: 'ko', flag: 'KR', fontClass: 'font-serif-kr' },
+            { id: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', wikiCode: 'vi', flag: 'VI', fontClass: 'font-serif-base' },
+            { id: 'es', name: 'Spanish', nativeName: 'Español', wikiCode: 'es', flag: 'ES', fontClass: 'font-serif-base' },
+            { id: 'fr', name: 'French', nativeName: 'Français', wikiCode: 'fr', flag: 'FR', fontClass: 'font-serif-base' },
+            { id: 'de', name: 'German', nativeName: 'Deutsch', wikiCode: 'de', flag: 'DE', fontClass: 'font-serif-base' },
+            { id: 'el', name: 'Greek', nativeName: 'Ελληνικά', wikiCode: 'el', flag: 'GR', fontClass: 'font-serif-base' },
+            { id: 'it', name: 'Italian', nativeName: 'Italiano', wikiCode: 'it', flag: 'IT', fontClass: 'font-serif-base' },
+            { id: 'ru', name: 'Russian', nativeName: 'Русский', wikiCode: 'ru', flag: 'RU', fontClass: 'font-serif-base' },
+            { id: 'he', name: 'Hebrew', nativeName: 'עברית', wikiCode: 'he', flag: 'IL', fontClass: 'font-serif-he', dir: 'rtl' },
+            { id: 'ar', name: 'Arabic', nativeName: 'العربية', wikiCode: 'ar', flag: 'AR', fontClass: 'font-serif-base', dir: 'rtl' },
+            { id: 'hi', name: 'Hindi', nativeName: 'हिन्दी', wikiCode: 'hi', flag: 'IN', fontClass: 'font-serif-in' },
+            { id: 'bo', name: 'Tibetan', nativeName: 'བོད་ཡིག', wikiCode: 'bo', flag: 'TB', fontClass: 'font-serif-bo' },
+            { id: 'en', name: 'English', nativeName: 'English', wikiCode: 'en', flag: 'EN', fontClass: 'font-serif-base' },
+            { id: 'cn', name: 'Chinese', nativeName: '中文', wikiCode: 'zh', flag: 'CN', fontClass: 'font-serif-cn' },
         ];
 
         const DEFAULT_LANGUAGES = ['jp', 'kr', 'vi', 'es', 'fr', 'de', 'el', 'it', 'ru', 'he', 'ar', 'hi', 'bo'];
 
         /*******************************************************
-         * 2. SERVICES (API & AUDIO)
+         * 2. SERVICES
          *******************************************************/
         
-        // --- Wikipedia API Service ---
         const fetchRandomWikiArticle = async (wikiCode, retries = 2) => {
             try {
-                // To fetch random articles with HIGH text density
                 const params = new URLSearchParams({
                     action: 'query',
                     format: 'json',
@@ -109,34 +144,25 @@
                     grnnamespace: '0', 
                     prop: 'extracts|pageimages|info',
                     inprop: 'url',
-                    // High character count for that "dense text" feel
-                    exchars: '3500', 
+                    exchars: '3000', 
                     exlimit: '1',
                     explaintext: '1', 
-                    pithumbsize: '400',
-                    // CRITICAL for local file:// execution:
+                    pithumbsize: '500',
                     origin: '*' 
                 });
 
                 const url = `https://${wikiCode}.wikipedia.org/w/api.php?${params.toString()}`;
-                
                 const response = await fetch(url);
-
-                if (!response.ok) {
-                    throw new Error(`Wiki Network Error: ${response.status}`);
-                }
-
+                if (!response.ok) throw new Error(`Status ${response.status}`);
                 const data = await response.json();
                 const pages = data.query?.pages;
-                
-                if (!pages) throw new Error("No pages found");
+                if (!pages) throw new Error("Void returned");
 
                 const pageId = Object.keys(pages)[0];
                 const page = pages[pageId];
 
-                // Ensure we actually have text
                 if (!page.extract || page.extract.length < 100) {
-                    throw new Error("Article too short, retrying...");
+                    throw new Error("Silence encountered, retrying...");
                 }
 
                 return {
@@ -146,10 +172,8 @@
                     pageUrl: page.fullurl,
                     lang: wikiCode
                 };
-
             } catch (error) {
                 if (retries > 0) {
-                    console.warn(`Retrying ${wikiCode}...`);
                     await new Promise(r => setTimeout(r, 1000));
                     return fetchRandomWikiArticle(wikiCode, retries - 1);
                 }
@@ -157,93 +181,60 @@
             }
         };
 
-        // --- Audio Service (Browser Native) ---
-        const speakText = (text, locale) => {
-            if (!('speechSynthesis' in window)) return;
-            window.speechSynthesis.cancel();
-
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = locale;
-            utterance.rate = 0.9;
-            utterance.pitch = 1.0;
-
-            const voices = window.speechSynthesis.getVoices();
-            // Try to match the exact locale first, then the language code
-            const voice = voices.find(v => v.lang === locale) || 
-                          voices.find(v => v.lang.startsWith(locale.split('-')[0]));
-            if (voice) utterance.voice = voice;
-
-            window.speechSynthesis.speak(utterance);
-        };
-
-        const stopSpeech = () => {
-            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-        };
-
         /*******************************************************
          * 3. COMPONENTS
          *******************************************************/
 
-        // --- Icons (Inline SVGs) ---
         const Icons = {
-            Volume: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>,
-            Translate: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 8 5 5 5-5"></path><path d="M12 2v20"></path><path d="M2 12h20"></path><path d="m19 16-5 5-5-5"></path></svg>,
-            Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>,
-            RefreshBig: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path></svg>,
-            Settings: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>,
-            Plus: () => <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>,
-            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>,
-            Close: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 18 18"></path></svg>
+            Translate: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>,
+            Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>,
+            Settings: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>,
+            Close: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 18 18"></path></svg>
         };
 
         // --- Settings Modal ---
         const SettingsModal = ({ isOpen, onClose, selectedIds, onToggleId }) => {
             if (!isOpen) return null;
             return (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-none shadow-2xl w-full max-w-md overflow-hidden border-2 border-slate-900">
-                        <div className="flex items-center justify-between p-5 border-b-2 border-slate-900 bg-slate-50">
-                            <h2 className="text-xl font-black uppercase tracking-wider font-serif-base text-slate-900">Select Editions</h2>
-                            <button onClick={onClose} className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-colors">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm transition-opacity duration-500">
+                    <div className="bg-black border border-white w-full max-w-md shadow-2xl animate-drift">
+                        <div className="flex items-center justify-between p-6 border-b border-white/20">
+                            <h2 className="text-xl font-latex tracking-[0.2em] text-white lowercase italic">Selections</h2>
+                            <button onClick={onClose} className="text-white hover:opacity-50 transition-opacity">
                                 <Icons.Close />
                             </button>
                         </div>
-                        <div className="p-5 max-h-[60vh] overflow-y-auto custom-scroll bg-white">
-                            <div className="space-y-3">
+                        <div className="p-4 max-h-[50vh] overflow-y-auto bg-black custom-scrollbar">
+                            <div className="space-y-1">
                                 {AVAILABLE_LANGUAGES.map((lang) => {
                                     const isSelected = selectedIds.includes(lang.id);
                                     return (
                                         <button
                                             key={lang.id}
                                             onClick={() => onToggleId(lang.id)}
-                                            className={`w-full flex items-center justify-between p-4 border transition-all duration-200 group ${
-                                                isSelected 
-                                                    ? 'border-slate-900 bg-slate-100' 
-                                                    : 'border-slate-300 hover:border-slate-500 hover:bg-slate-50'
+                                            className={`w-full flex items-center justify-between p-4 transition-all duration-300 group border-b border-white/10 hover:border-white ${
+                                                isSelected ? 'bg-white/10' : 'bg-transparent'
                                             }`}
                                         >
                                             <div className="flex items-center gap-4">
-                                                <span className="text-2xl font-serif-base font-bold text-slate-300 group-hover:text-slate-500 w-8">{lang.flag}</span>
                                                 <div className="text-left">
-                                                    <div className={`font-bold uppercase tracking-wide text-sm ${isSelected ? 'text-slate-900' : 'text-slate-600'}`}>
+                                                    <div className={`font-latex italic text-lg tracking-wide ${isSelected ? 'text-white' : 'text-white/50 group-hover:text-white'}`}>
                                                         {lang.name}
                                                     </div>
-                                                    <div className={`text-sm ${lang.fontClass} text-slate-500`}>{lang.nativeName}</div>
                                                 </div>
                                             </div>
-                                            <div className={`w-6 h-6 border-2 flex items-center justify-center transition-colors ${
-                                                isSelected ? 'bg-slate-900 border-slate-900 text-white' : 'border-slate-300'
+                                            <div className={`w-3 h-3 border rotate-45 flex items-center justify-center transition-all duration-300 ${
+                                                isSelected ? 'bg-white border-white' : 'border-white/50 group-hover:border-white'
                                             }`}>
-                                                {isSelected && <Icons.Check />}
                                             </div>
                                         </button>
                                     );
                                 })}
                             </div>
                         </div>
-                        <div className="p-5 bg-slate-50 border-t-2 border-slate-900">
-                           <button onClick={onClose} className="w-full py-3 bg-slate-900 text-white font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors shadow-lg">
-                             Confirm Selection
+                        <div className="p-6 border-t border-white/20 bg-black text-center">
+                           <button onClick={onClose} className="text-sm font-latex tracking-[0.3em] text-white/70 hover:text-white transition-colors uppercase">
+                             Return
                            </button>
                         </div>
                     </div>
@@ -255,39 +246,41 @@
         const LanguageCard = ({ lang, content, loading, onRefresh }) => {
             const isRtl = lang.dir === 'rtl';
             const fontClass = lang.fontClass || 'font-serif-base';
-
-            const handlePlayAudio = (e) => {
-                e.stopPropagation();
-                if (content?.extract) {
-                    const cleanText = content.extract.replace(/\[.*?\]/g, '').substring(0, 500); // Read first 500 chars
-                    speakText(cleanText, lang.locale);
-                }
-            };
-
-            const getTranslateUrl = () => {
-                if (!content) return '#';
-                const text = content.extract.substring(0, 1500);
-                return `https://translate.google.com/?sl=${lang.wikiCode}&tl=en&text=${encodeURIComponent(text)}&op=translate`;
+            
+            const handleTranslate = () => {
+                if (!content) return;
+                const text = encodeURIComponent(content.extract.substring(0, 1500));
+                const url = `https://translate.google.com/?sl=${lang.wikiCode}&tl=en&text=${text}&op=translate`;
+                window.open(url, '_blank');
             };
 
             return (
-                <div className="break-inside-avoid mb-8 bg-white border border-slate-300 shadow-sm relative group p-5 h-fit hover:shadow-md transition-shadow">
+                <div className="w-full mb-28 relative group animate-drift">
+                    {/* Decorative Top Line - Pure White */}
+                    <div className="w-full h-px bg-white mb-10 opacity-30 group-hover:opacity-100 transition-opacity duration-700"></div>
+
                     {/* Header */}
-                    <div className={`flex items-center justify-between border-b-4 border-slate-900 mb-4 pb-2 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-baseline gap-3 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            <span className="font-black text-lg uppercase tracking-widest text-slate-900">{lang.name}</span>
-                            <span className={`text-sm text-slate-500 ${fontClass}`}>{lang.nativeName}</span>
+                    <div className={`flex items-end justify-between mb-8 opacity-70 group-hover:opacity-100 transition-opacity duration-1000 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                        <div className={`flex items-baseline gap-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <span className="font-latex italic text-xl tracking-[0.05em] text-white lowercase">{lang.name}</span>
                         </div>
                         
-                        {/* Tools */}
-                        <div className={`flex gap-4 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity ${isRtl ? 'flex-row-reverse' : ''}`}>
-                            <button onClick={handlePlayAudio} disabled={!content} className="text-slate-400 hover:text-slate-900 transition-colors" title="Read Aloud">
-                                <Icons.Volume />
+                        {/* Tools - Minimalist */}
+                        <div className={`flex gap-6 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                            <button 
+                                onClick={handleTranslate} 
+                                disabled={!content || loading} 
+                                className={`text-white/60 hover:text-white transition-colors duration-300`}
+                                title="Decipher"
+                            >
+                                <Icons.Translate /> 
                             </button>
-                            <a href={getTranslateUrl()} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-900 transition-colors" title="Translate">
-                                <Icons.Translate />
-                            </a>
-                            <button onClick={onRefresh} className={`text-slate-400 hover:text-slate-900 transition-colors ${loading ? 'animate-spin' : ''}`} title="Next Article">
+                            <button 
+                                onClick={onRefresh} 
+                                disabled={loading}
+                                className={`text-white/60 hover:text-white transition-colors duration-300 ${loading ? 'animate-spin' : ''}`} 
+                                title="Renew"
+                            >
                                 <Icons.Refresh />
                             </button>
                         </div>
@@ -295,42 +288,47 @@
 
                     {/* Content */}
                     {loading ? (
-                        <div className="animate-pulse space-y-3 py-2">
-                            <div className="h-6 bg-slate-200 w-3/4 mb-4"></div>
-                            <div className="h-2 bg-slate-100 w-full"></div>
-                            <div className="h-2 bg-slate-100 w-full"></div>
-                            <div className="h-2 bg-slate-100 w-full"></div>
-                            <div className="h-2 bg-slate-100 w-full"></div>
-                            <div className="h-2 bg-slate-100 w-full"></div>
-                            <div className="h-2 bg-slate-100 w-full"></div>
-                            <div className="h-2 bg-slate-100 w-5/6"></div>
+                        <div className="animate-pulse space-y-6 opacity-30">
+                            <div className="h-4 bg-white/20 w-32 mx-auto mb-10"></div>
+                            <div className="space-y-3">
+                                <div className="h-1 bg-white/20 w-full"></div>
+                                <div className="h-1 bg-white/20 w-full"></div>
+                                <div className="h-1 bg-white/20 w-5/6"></div>
+                            </div>
                         </div>
                     ) : content ? (
                         <article className={isRtl ? 'rtl' : 'ltr'} dir={isRtl ? 'rtl' : 'ltr'}>
-                            <h3 className={`text-2xl font-bold text-slate-900 mb-4 leading-tight ${fontClass} ${isRtl ? 'text-right' : 'text-left'}`}>
-                                <a href={content.pageUrl} target="_blank" rel="noopener noreferrer" className="hover:underline decoration-2 underline-offset-4">
+                            <h3 className={`text-3xl font-latex italic text-white mb-8 leading-snug tracking-wide text-center opacity-100 ${fontClass}`}>
+                                <a href={content.pageUrl} target="_blank" rel="noopener noreferrer" className="hover:border-b hover:border-white border-b border-transparent transition-all duration-300 pb-1">
                                     {content.title}
                                 </a>
                             </h3>
                             
-                            <div className="relative">
+                            <div className="relative clearfix">
                                 {content.thumbnailUrl && (
-                                    <img 
-                                        src={content.thumbnailUrl} 
-                                        alt=""
-                                        className={`${isRtl ? 'float-left mr-5' : 'float-right ml-5'} mb-3 w-32 h-auto grayscale hover:grayscale-0 transition-all border border-slate-200 p-1 bg-white`}
-                                    />
+                                    <div className={`${isRtl ? 'float-left mr-8' : 'float-right ml-8'} mb-4 w-40 opacity-80 hover:opacity-100 transition-opacity duration-700`}>
+                                        {/* High contrast image processing: Grayscale and high contrast */}
+                                        <img 
+                                            src={content.thumbnailUrl} 
+                                            alt=""
+                                            className="w-full h-auto grayscale contrast-150 brightness-110 border border-white p-1 bg-black"
+                                        />
+                                    </div>
                                 )}
-                                <p className={`text-[0.95rem] leading-[1.7] text-slate-800 text-justify text-justify-all ${fontClass}`}>
+                                {/* ITALIC BODY TEXT - PURE WHITE */}
+                                <p className={`text-[1.15rem] leading-[2.1] text-white text-justify text-justify-all font-light italic ${fontClass}`}>
                                     {content.extract}
                                 </p>
                             </div>
                         </article>
                     ) : (
-                        <div className="text-sm text-red-500 italic py-4 border-t border-red-100">
-                           Connection interrupted. <button onClick={onRefresh} className="underline font-bold">Try again</button>
+                        <div className="text-sm text-white/50 italic py-8 text-center font-latex tracking-widest">
+                           Signal lost in the void. <button onClick={onRefresh} className="underline hover:text-white">Re-establish.</button>
                         </div>
                     )}
+                    
+                    {/* Decorative Bottom Line (only visible on hover) - Pure White */}
+                    <div className="w-full h-px bg-white mt-12 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                 </div>
             );
         };
@@ -340,17 +338,16 @@
          *******************************************************/
         const App = () => {
             const [selectedLangIds, setSelectedLangIds] = React.useState(() => {
-                const saved = localStorage.getItem('polyglot_langs_v2');
+                const saved = localStorage.getItem('ephemera_langs');
                 return saved ? JSON.parse(saved) : DEFAULT_LANGUAGES;
             });
             const [contentState, setContentState] = React.useState({});
             const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
             React.useEffect(() => {
-                localStorage.setItem('polyglot_langs_v2', JSON.stringify(selectedLangIds));
+                localStorage.setItem('ephemera_langs', JSON.stringify(selectedLangIds));
             }, [selectedLangIds]);
 
-            // Staggered Fetching
             const fetchContent = React.useCallback(async (langId) => {
                 const langConfig = AVAILABLE_LANGUAGES.find(l => l.id === langId);
                 if (!langConfig) return;
@@ -361,7 +358,6 @@
                     const data = await fetchRandomWikiArticle(langConfig.wikiCode);
                     setContentState(prev => ({ ...prev, [langId]: { data, loading: false, error: null } }));
                 } catch (error) {
-                    console.error(`Error ${langId}:`, error);
                     setContentState(prev => ({ ...prev, [langId]: { ...prev[langId], loading: false, error: "Error" } }));
                 }
             }, []);
@@ -369,22 +365,20 @@
             React.useEffect(() => {
                 const langsToFetch = selectedLangIds.filter(id => !contentState[id]?.data && !contentState[id]?.loading);
                 if (langsToFetch.length === 0) return;
-
                 const fetchSequentially = async () => {
                     for (const id of langsToFetch) {
                         await fetchContent(id);
-                        await new Promise(r => setTimeout(r, 200)); 
+                        await new Promise(r => setTimeout(r, 300)); 
                     }
                 };
                 fetchSequentially();
             }, [selectedLangIds, fetchContent]);
 
             const handleRefreshAll = () => {
-                stopSpeech();
                 const refresh = async () => {
                     for (const id of selectedLangIds) {
                         fetchContent(id);
-                        await new Promise(r => setTimeout(r, 100));
+                        await new Promise(r => setTimeout(r, 150));
                     }
                 };
                 refresh();
@@ -397,28 +391,33 @@
             const activeLanguages = AVAILABLE_LANGUAGES.filter(l => selectedLangIds.includes(l.id));
 
             return (
-                <div className="min-h-screen p-4 sm:p-8 lg:p-12 max-w-[1920px] mx-auto">
-                    <header className="border-b-[6px] border-slate-900 mb-10 pb-6 flex flex-col md:flex-row justify-between items-end gap-6">
-                        <div className="w-full md:w-auto">
-                            <div className="text-xs font-bold tracking-[0.4em] text-slate-500 uppercase mb-2 border-b border-slate-300 pb-1 inline-block">
-                                The Daily Multilingual
-                            </div>
-                            <h1 className="text-5xl sm:text-7xl font-black font-serif-base tracking-tighter text-slate-900 uppercase leading-[0.85]">
-                                Polyglot Pulse
+                <div className="min-h-screen p-8 md:p-16 bg-void text-mist selection:bg-mist selection:text-void">
+                    
+                    {/* Header */}
+                    <header className="max-w-2xl mx-auto mb-32 flex flex-col items-center text-center pt-10">
+                        <div className="mb-8 opacity-100">
+                             {/* Uppercase Title, EB Garamond font, Pure White */}
+                             <h1 className="text-6xl md:text-8xl font-latex font-medium text-white tracking-[0.15em] uppercase">
+                                EPHEMERA
                             </h1>
                         </div>
+                        <div className="h-px w-12 bg-white mb-6"></div>
+                        <div className="text-sm font-latex italic tracking-[0.1em] text-white/70 lowercase">
+                            fragments of a fleeing reality
+                        </div>
                         
-                        <div className="flex gap-4 w-full md:w-auto justify-end">
-                            <button onClick={handleRefreshAll} className="px-6 py-3 border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-900 hover:text-white transition-colors uppercase text-sm tracking-widest flex items-center gap-2">
-                                <Icons.RefreshBig /> Update Issue
+                        <div className="flex gap-10 mt-12 opacity-60 hover:opacity-100 transition-opacity duration-500">
+                            <button onClick={handleRefreshAll} className="text-xs font-latex tracking-[0.2em] text-white hover:text-white uppercase flex items-center gap-2 group">
+                                <span className="group-hover:rotate-180 transition-transform duration-700"><Icons.Refresh /></span> renew
                             </button>
-                            <button onClick={() => setIsSettingsOpen(true)} className="px-6 py-3 bg-slate-200 text-slate-900 font-bold hover:bg-slate-300 transition-colors uppercase text-sm tracking-widest flex items-center gap-2">
-                                <Icons.Settings /> Editions
+                            <button onClick={() => setIsSettingsOpen(true)} className="text-xs font-latex tracking-[0.2em] text-white hover:text-white uppercase flex items-center gap-2">
+                                <Icons.Settings /> curate
                             </button>
                         </div>
                     </header>
 
-                    <main className="columns-1 md:columns-2 xl:columns-3 2xl:columns-4 gap-8 space-y-8">
+                    {/* Main Content */}
+                    <main className="max-w-2xl mx-auto flex flex-col gap-24">
                         {activeLanguages.map(lang => (
                             <LanguageCard 
                                 key={lang.id}
@@ -429,11 +428,16 @@
                             />
                         ))}
                         
-                        <div onClick={() => setIsSettingsOpen(true)} className="break-inside-avoid mb-6 border-4 border-double border-slate-300 min-h-[300px] flex flex-col items-center justify-center cursor-pointer hover:border-slate-900 hover:bg-white transition-colors text-slate-400 hover:text-slate-900 group">
-                            <div className="transform group-hover:scale-110 transition-transform"><Icons.Plus /></div>
-                            <span className="mt-4 text-sm font-bold uppercase tracking-widest">Subscribe to more regions</span>
+                        <div onClick={() => setIsSettingsOpen(true)} className="py-20 flex flex-col items-center justify-center cursor-pointer text-white/40 hover:text-white transition-colors opacity-50 hover:opacity-100">
+                            <span className="text-3xl font-light mb-4 italic font-latex">†</span>
+                            <span className="text-xs font-latex tracking-[0.3em] uppercase">seek elsewhere</span>
                         </div>
                     </main>
+
+                    {/* Footer */}
+                    <footer className="mt-32 text-center opacity-30 hover:opacity-100 transition-opacity duration-1000">
+                         <p className="text-xs font-latex italic text-white">memento mori</p>
+                    </footer>
 
                     <SettingsModal 
                         isOpen={isSettingsOpen}
@@ -445,7 +449,6 @@
             );
         };
 
-        // --- Mount ---
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
